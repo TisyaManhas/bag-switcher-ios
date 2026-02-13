@@ -39,6 +39,8 @@ struct BagSwitcherView: View {
                         ForEach(Array(bagManager.bags.enumerated()), id: \.element.id) { index, bag in
                             BagCardView(
                                 bag: bag,
+                                bagIndex: index,
+                                totalBags: bagManager.bags.count,
                                 isSelected: index == bagManager.currentBagIndex,
                                 onClose: {
                                     withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {

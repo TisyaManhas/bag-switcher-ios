@@ -9,6 +9,8 @@ import SwiftUI
 
 struct BagCardView: View {
     let bag: Bag
+    let bagIndex: Int
+    let totalBags: Int
     let isSelected: Bool
     let onClose: () -> Void
     let onTap: () -> Void
@@ -16,79 +18,39 @@ struct BagCardView: View {
     @State private var isPressed = false
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Close button
-            HStack {
-                Spacer()
-                Button(action: onClose) {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(.secondary)
-                        .frame(width: 24, height: 24)
-                        .background(
-                            Circle()
-                                .fill(.ultraThinMaterial)
-                        )
-                }
-                .padding(8)
+        ZStack(alignment: .topTrailing) {
+            // Full-bleed screen preview that covers entire card
+            BagScreenView(
+                bag: bag,
+                bagIndex: bagIndex,
+                totalBags: totalBags
+            )
+            .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
+            .scaleEffect(0.45) // Larger scale for better visibility
+            .offset(y: 55) // Shift down to show top content better
+            .frame(width: 160, height: 280)
+            .clipped()
+            .clipShape(RoundedRectangle(cornerRadius: 20))
+            .overlay(
+                RoundedRectangle(cornerRadius: 20)
+                    .stroke(isSelected ? bag.color : Color.clear, lineWidth: 2)
+            )
+
+            // Floating close button on top of preview
+            Button(action: onClose) {
+                Image(systemName: "xmark.circle.fill")
+                    .font(.system(size: 24))
+                    .foregroundColor(.white)
+                    .symbolRenderingMode(.hierarchical)
+                    .background(
+                        Circle()
+                            .fill(Color.black.opacity(0.3))
+                            .frame(width: 28, height: 28)
+                    )
             }
-
-            // Card content
-            VStack(spacing: 12) {
-                // Icon
-                Image(systemName: bag.icon)
-                    .font(.system(size: 40))
-                    .foregroundStyle(bag.color.gradient)
-
-                // Bag name
-                Text(bag.name)
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(.primary)
-                    .lineLimit(1)
-
-                // Item count and total
-                VStack(spacing: 4) {
-                    Text("\(bag.itemCount) items")
-                        .font(.system(size: 13))
-                        .foregroundColor(.secondary)
-
-                    Text("$\(String(format: "%.2f", bag.totalAmount))")
-                        .font(.system(size: 15, weight: .medium))
-                        .foregroundColor(.primary)
-                }
-
-                // Preview items
-                if !bag.items.isEmpty {
-                    VStack(alignment: .leading, spacing: 2) {
-                        ForEach(bag.items.prefix(2)) { item in
-                            Text("• \(item.name)")
-                                .font(.system(size: 11))
-                                .foregroundColor(.secondary)
-                                .lineLimit(1)
-                        }
-                        if bag.items.count > 2 {
-                            Text("• +\(bag.items.count - 2) more")
-                                .font(.system(size: 11))
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 8)
-                }
-            }
-            .padding(.horizontal, 12)
-            .padding(.bottom, 16)
+            .padding(8)
         }
-        .frame(height: 280)
-        .background(
-            RoundedRectangle(cornerRadius: 20)
-                .fill(.ultraThinMaterial)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 20)
-                        .stroke(isSelected ? bag.color : Color.clear, lineWidth: 2)
-                )
-        )
-        .shadow(color: .black.opacity(0.15), radius: 12, x: 0, y: 4)
+        .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 4)
         .scaleEffect(isPressed ? 0.95 : 1.0)
         .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isPressed)
         .onTapGesture {
@@ -112,6 +74,8 @@ struct BagCardView: View {
 
         BagCardView(
             bag: Bag.sampleBags[0],
+            bagIndex: 0,
+            totalBags: 4,
             isSelected: true,
             onClose: {},
             onTap: {}

@@ -1,5 +1,5 @@
 //
-//  BagPreviewView.swift
+//  BagScreenView.swift
 //  DemoApp
 //
 //  Created by Tisya Manhas on 13/02/26.
@@ -7,9 +7,9 @@
 
 import SwiftUI
 
-/// This view shows exactly what the screen looks like for a specific bag
-/// (like Safari shows webpage previews in tab cards)
-struct BagPreviewView: View {
+/// Reusable view that shows the actual bag screen
+/// Used both in main view (full size) and in cards (scaled down)
+struct BagScreenView: View {
     let bag: Bag
     let bagIndex: Int
     let totalBags: Int
@@ -21,10 +21,10 @@ struct BagPreviewView: View {
                     .ignoresSafeArea()
 
                 VStack(spacing: 20) {
-                    // Current bag display (matching ContentView)
+                    // Current bag display
                     currentBagView
 
-                    // Sample content (matching ContentView)
+                    // Sample content
                     ScrollView {
                         VStack(spacing: 16) {
                             ForEach(bag.items) { item in
@@ -36,14 +36,13 @@ struct BagPreviewView: View {
 
                     Spacer()
                 }
-                .padding(.top, 8)
             }
             .navigationTitle("EasyPay")
             .navigationBarTitleDisplayMode(.inline)
         }
     }
 
-    // MARK: - Current Bag View (matches ContentView)
+    // MARK: - Current Bag View
     private var currentBagView: some View {
         VStack(spacing: 12) {
             HStack {
@@ -88,7 +87,7 @@ struct BagPreviewView: View {
         }
     }
 
-    // MARK: - Item Row (matches ContentView)
+    // MARK: - Item Row
     private func itemRow(_ item: BagItem) -> some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
@@ -114,7 +113,7 @@ struct BagPreviewView: View {
 }
 
 #Preview {
-    BagPreviewView(
+    BagScreenView(
         bag: Bag.sampleBags[0],
         bagIndex: 0,
         totalBags: 4
