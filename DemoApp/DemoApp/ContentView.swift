@@ -37,9 +37,13 @@ struct ContentView: View {
                     Spacer()
                     HStack {
                         Spacer()
-                        bagSwitcherButton
-                            .padding(.trailing, 24)
-                            .padding(.bottom, 24)
+                        BagSwitcherButton(bagCount: bagManager.bags.count) {
+                            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                                showBagSwitcher = true
+                            }
+                        }
+                        .padding(.trailing, 24)
+                        .padding(.bottom, 24)
                     }
                 }
             }
@@ -118,42 +122,6 @@ struct ContentView: View {
             RoundedRectangle(cornerRadius: 12)
                 .fill(.ultraThinMaterial)
         )
-    }
-
-    // MARK: - Bag Switcher Button
-    private var bagSwitcherButton: some View {
-        Button(action: {
-            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-                showBagSwitcher = true
-            }
-        }) {
-            ZStack {
-                // Stacked cards effect (similar to Safari tabs icon)
-                ForEach(0..<min(3, bagManager.bags.count), id: \.self) { index in
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(.ultraThinMaterial)
-                        .frame(width: 56, height: 56)
-                        .offset(
-                            x: CGFloat(index) * -2,
-                            y: CGFloat(index) * -4
-                        )
-                        .opacity(1.0 - Double(index) * 0.3)
-                }
-
-                // Main icon
-                VStack(spacing: 2) {
-                    Image(systemName: "square.stack.3d.up.fill")
-                        .font(.system(size: 24))
-                        .foregroundStyle(Color.blue.gradient)
-
-                    Text("\(bagManager.bags.count)")
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundColor(.primary)
-                }
-                .offset(x: -2, y: -4)
-            }
-        }
-        .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 4)
     }
 }
 
