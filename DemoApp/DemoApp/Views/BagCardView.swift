@@ -12,6 +12,7 @@ struct BagCardView: View {
     let bagIndex: Int
     let totalBags: Int
     let isSelected: Bool
+    let namespace: Namespace.ID
     let onClose: () -> Void
     let onTap: () -> Void
 
@@ -33,7 +34,7 @@ struct BagCardView: View {
             .clipShape(RoundedRectangle(cornerRadius: 20))
             .overlay(
                 RoundedRectangle(cornerRadius: 20)
-                    .stroke(isSelected ? bag.color : Color.clear, lineWidth: 2)
+                    .stroke(isSelected ? Color.blue : Color.clear, lineWidth: 2)
             )
 
             // Floating close button on top of preview
@@ -50,6 +51,10 @@ struct BagCardView: View {
             }
             .padding(8)
         }
+        .matchedGeometryEffect(
+            id: bag.id,
+            in: namespace
+        )
         .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 4)
         .scaleEffect(isPressed ? 0.95 : 1.0)
         .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isPressed)
@@ -68,6 +73,8 @@ struct BagCardView: View {
 }
 
 #Preview {
+    @Previewable @Namespace var namespace
+
     ZStack {
         Color.gray.opacity(0.2)
             .ignoresSafeArea()
@@ -77,6 +84,7 @@ struct BagCardView: View {
             bagIndex: 0,
             totalBags: 4,
             isSelected: true,
+            namespace: namespace,
             onClose: {},
             onTap: {}
         )
