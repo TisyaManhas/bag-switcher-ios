@@ -27,34 +27,34 @@ struct BagCardView: View {
                 totalBags: totalBags
             )
             .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
-            .scaleEffect(0.45) // Larger scale for better visibility
-            .offset(y: 55) // Shift down to show top content better
-            .frame(width: 160, height: 280)
+            .scaleEffect(0.47) // Increased scale to fill card completely
+            .offset(y: 75) // Adjusted offset for better centering
+            .frame(width: 185, height: 260)
             .clipped()
-            .clipShape(RoundedRectangle(cornerRadius: 20))
+            .clipShape(RoundedRectangle(cornerRadius: 16))
             .overlay(
-                RoundedRectangle(cornerRadius: 20)
-                    .stroke(isSelected ? Color.blue : Color.clear, lineWidth: 2)
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(isSelected ? Color.blue : Color.clear, lineWidth: 2.5)
             )
 
             // Floating close button on top of preview
             Button(action: onClose) {
                 Image(systemName: "xmark")
-                    .font(.system(size: 12, weight: .semibold))
+                    .font(.system(size: 11, weight: .semibold))
                     .foregroundColor(.gray)
-                    .frame(width: 20, height: 20)
+                    .frame(width: 18, height: 18)
                     .background(
                         Circle()
-                            .fill(Color.white.opacity(0.85))
+                            .fill(Color.white.opacity(0.9))
                     )
             }
-            .padding(8)
+            .padding(6)
         }
         .matchedGeometryEffect(
             id: bag.id,
             in: namespace
         )
-        .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 4)
+        .shadow(color: .black.opacity(0.15), radius: 12, x: 0, y: 4)
         .scaleEffect(isPressed ? 0.95 : 1.0)
         .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isPressed)
         .onTapGesture {

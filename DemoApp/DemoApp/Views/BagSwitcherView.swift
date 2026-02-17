@@ -43,7 +43,7 @@ struct BagSwitcherView: View {
                                 // Invisible placeholder to maintain grid spacing
                                 Rectangle()
                                     .fill(Color.clear)
-                                    .frame(width: 160, height: 280)
+                                    .frame(width: 185, height: 260)
                             } else {
                                 BagCardView(
                                     bag: bag,
