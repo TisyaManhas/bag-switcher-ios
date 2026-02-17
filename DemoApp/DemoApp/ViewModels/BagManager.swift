@@ -21,7 +21,7 @@ class BagManager {
         self.currentBagIndex = 0
     }
 
-    func addNewBag() {
+    func addNewBag() -> Bag {
         let newBag = Bag(
             name: "New Bag \(bags.count + 1)",
             itemCount: 0,
@@ -33,6 +33,7 @@ class BagManager {
         )
         bags.append(newBag)
         currentBagIndex = bags.count - 1
+        return newBag
     }
 
     func selectBag(at index: Int) {

@@ -58,7 +58,7 @@ struct ContentView: View {
                         withAnimation(.easeOut(duration: 0.4)) {
                             showBagSwitcher = false
                         }
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                             selectedBagForZoom = nil
                         }
                     }

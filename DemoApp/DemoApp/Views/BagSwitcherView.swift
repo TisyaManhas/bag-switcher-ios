@@ -14,7 +14,8 @@ struct BagSwitcherView: View {
     let onDismiss: () -> Void
 
     @State private var dragOffset: CGSize = .zero
-    @State private var showingAddBagAnimation = false
+    @State private var creatingNewBag = false
+    @State private var newBagToAnimate: Bag?
 
     // Grid columns - 2 columns like Safari
     let columns = [
@@ -37,13 +38,13 @@ struct BagSwitcherView: View {
 
                 // Scrollable bag grid
                 ScrollView {
-                    LazyVGrid(columns: columns, spacing: 16) {
+                    LazyVGrid(columns: columns, spacing: 14) {
                         ForEach(Array(bagManager.bags.enumerated()), id: \.element.id) { index, bag in
                             if selectedBagForZoom == bag.id {
                                 // Invisible placeholder to maintain grid spacing
                                 Rectangle()
                                     .fill(Color.clear)
-                                    .frame(width: 185, height: 260)
+                                    .frame(width: 185, height: 290)
                             } else {
                                 BagCardView(
                                     bag: bag,
@@ -82,26 +83,49 @@ struct BagSwitcherView: View {
             VStack {
                 Spacer()
                 HStack(spacing: 20) {
-                    // Add new bag button - floating
-                    Button(action: {
-                        withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
-                            bagManager.addNewBag()
-                            showingAddBagAnimation = true
-                        }
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                            showingAddBagAnimation = false
-                        }
-                    }) {
-                        Image(systemName: "plus")
-                            .font(.system(size: 24, weight: .medium))
-                            .foregroundColor(.primary)
-                            .frame(width: 56, height: 56)
-                            .background(
-                                Circle()
-                                    .fill(.ultraThinMaterial)
+                    // Add new bag button - floating OR mini bag preview when creating
+                    ZStack {
+                        if let newBag = newBagToAnimate, creatingNewBag {
+                            // Mini bag preview that will expand
+                            BagScreenView(
+                                bag: newBag,
+                                bagIndex: bagManager.bags.count - 1,
+                                totalBags: bagManager.bags.count
                             )
-                            .shadow(color: .black.opacity(0.15), radius: 8, x: 0, y: 2)
-                            .scaleEffect(showingAddBagAnimation ? 1.2 : 1.0)
+                            .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
+                            .scaleEffect(0.05)
+                            .frame(width: 56, height: 56)
+                            .clipShape(Circle())
+                            .matchedGeometryEffect(
+                                id: newBag.id,
+                                in: namespace
+                            )
+                        } else {
+                            Button(action: {
+                                let newBag = bagManager.addNewBag()
+                                newBagToAnimate = newBag
+                                creatingNewBag = true
+
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                                    withAnimation(.easeOut(duration: 0.4)) {
+                                        selectedBagForZoom = newBag.id
+                                    }
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                                        onDismiss()
+                                    }
+                                }
+                            }) {
+                                Image(systemName: "plus")
+                                    .font(.system(size: 24, weight: .medium))
+                                    .foregroundColor(.primary)
+                                    .frame(width: 56, height: 56)
+                                    .background(
+                                        Circle()
+                                            .fill(.ultraThinMaterial)
+                                    )
+                                    .shadow(color: .black.opacity(0.15), radius: 8, x: 0, y: 2)
+                            }
+                        }
                     }
 
                     Spacer()
@@ -155,12 +179,19 @@ struct BagSwitcherView: View {
                     }
                 }
         )
+        .onAppear {
+            // Reset when switcher appears
+            if selectedBagForZoom == nil {
+                creatingNewBag = false
+                newBagToAnimate = nil
+            }
+        }
     }
 
     // MARK: - Header View
     private var headerView: some View {
         HStack {
-            Text("All Bags")
+            Text("Saved Bags")
                 .font(.system(size: 28, weight: .bold))
                 .foregroundColor(.primary)
 
