@@ -24,8 +24,8 @@ struct BagSwitcherView: View {
 
     var body: some View {
         ZStack {
-            // Background blur
-            Color.black.opacity(0.3)
+            // Background blur - more transparent like iOS 18+
+            Color.black.opacity(0.15)
                 .ignoresSafeArea()
                 .onTapGesture {
                     onDismiss()
@@ -39,29 +39,35 @@ struct BagSwitcherView: View {
                 ScrollView {
                     LazyVGrid(columns: columns, spacing: 16) {
                         ForEach(Array(bagManager.bags.enumerated()), id: \.element.id) { index, bag in
-                            BagCardView(
-                                bag: bag,
-                                bagIndex: index,
-                                totalBags: bagManager.bags.count,
-                                isSelected: index == bagManager.currentBagIndex,
-                                namespace: namespace,
-                                onClose: {
-                                    withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-                                        bagManager.deleteBag(at: index)
+                            if selectedBagForZoom == bag.id {
+                                // Invisible placeholder to maintain grid spacing
+                                Rectangle()
+                                    .fill(Color.clear)
+                                    .frame(width: 160, height: 280)
+                            } else {
+                                BagCardView(
+                                    bag: bag,
+                                    bagIndex: index,
+                                    totalBags: bagManager.bags.count,
+                                    isSelected: index == bagManager.currentBagIndex,
+                                    namespace: namespace,
+                                    onClose: {
+                                        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                                            bagManager.deleteBag(at: index)
+                                        }
+                                    },
+                                    onTap: {
+                                        withAnimation(.easeOut(duration: 0.4)) {
+                                            selectedBagForZoom = bag.id
+                                            bagManager.selectBag(at: index)
+                                        }
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                                            onDismiss()
+                                        }
                                     }
-                                },
-                                onTap: {
-                                    withAnimation(.easeOut(duration: 0.4)) {
-                                        selectedBagForZoom = bag.id
-                                        bagManager.selectBag(at: index)
-                                    }
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
-                                        onDismiss()
-                                    }
-                                }
-                            )
-                            .opacity(selectedBagForZoom == bag.id ? 0 : 1)
-                            .transition(.scale.combined(with: .opacity))
+                                )
+                                .transition(.scale.combined(with: .opacity))
+                            }
                         }
                     }
                     .padding(.horizontal, 16)
@@ -75,7 +81,60 @@ struct BagSwitcherView: View {
             // Bottom toolbar
             VStack {
                 Spacer()
-                bottomToolbar
+                HStack(spacing: 20) {
+                    // Add new bag button - floating
+                    Button(action: {
+                        withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                            bagManager.addNewBag()
+                            showingAddBagAnimation = true
+                        }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            showingAddBagAnimation = false
+                        }
+                    }) {
+                        Image(systemName: "plus")
+                            .font(.system(size: 24, weight: .medium))
+                            .foregroundColor(.primary)
+                            .frame(width: 56, height: 56)
+                            .background(
+                                Circle()
+                                    .fill(.ultraThinMaterial)
+                            )
+                            .shadow(color: .black.opacity(0.15), radius: 8, x: 0, y: 2)
+                            .scaleEffect(showingAddBagAnimation ? 1.2 : 1.0)
+                    }
+
+                    Spacer()
+
+                    // Bag count - floating
+                    Text("\(bagManager.bags.count) Bags")
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundColor(.primary)
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 12)
+                        .background(
+                            Capsule()
+                                .fill(.ultraThinMaterial)
+                        )
+                        .shadow(color: .black.opacity(0.15), radius: 8, x: 0, y: 2)
+
+                    Spacer()
+
+                    // Done button - floating
+                    Button(action: { onDismiss() }) {
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 24, weight: .semibold))
+                            .foregroundColor(.white)
+                            .frame(width: 56, height: 56)
+                            .background(
+                                Circle()
+                                    .fill(Color.blue.gradient)
+                            )
+                            .shadow(color: .black.opacity(0.15), radius: 8, x: 0, y: 2)
+                    }
+                }
+                .padding(.horizontal, 24)
+                .padding(.bottom, 24)
             }
         }
         .offset(y: dragOffset.height)
@@ -106,80 +165,10 @@ struct BagSwitcherView: View {
                 .foregroundColor(.primary)
 
             Spacer()
-
-            Button(action: { onDismiss() }) {
-                Image(systemName: "xmark.circle.fill")
-                    .font(.system(size: 28))
-                    .foregroundColor(.secondary)
-                    .symbolRenderingMode(.hierarchical)
-            }
         }
         .padding(.horizontal, 24)
         .padding(.top, 20)
         .padding(.bottom, 10)
-    }
-
-    // MARK: - Bottom Toolbar
-    private var bottomToolbar: some View {
-        VStack(spacing: 0) {
-            HStack(spacing: 20) {
-                // Add new bag button
-                Button(action: {
-                    withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
-                        bagManager.addNewBag()
-                        showingAddBagAnimation = true
-                    }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                        showingAddBagAnimation = false
-                    }
-                }) {
-                    Image(systemName: "plus")
-                        .font(.system(size: 24, weight: .medium))
-                        .foregroundColor(.primary)
-                        .frame(width: 56, height: 56)
-                        .background(
-                            Circle()
-                                .fill(.ultraThinMaterial)
-                        )
-                        .scaleEffect(showingAddBagAnimation ? 1.2 : 1.0)
-                }
-
-                Spacer()
-
-                // Bag count
-                Text("\(bagManager.bags.count) Bags")
-                    .font(.system(size: 17, weight: .semibold))
-                    .foregroundColor(.primary)
-                    .padding(.horizontal, 24)
-                    .padding(.vertical, 12)
-                    .background(
-                        Capsule()
-                            .fill(.ultraThinMaterial)
-                    )
-
-                Spacer()
-
-                // Done button
-                Button(action: { onDismiss() }) {
-                    Image(systemName: "checkmark")
-                        .font(.system(size: 24, weight: .semibold))
-                        .foregroundColor(.white)
-                        .frame(width: 56, height: 56)
-                        .background(
-                            Circle()
-                                .fill(Color.blue.gradient)
-                        )
-                }
-            }
-            .padding(.horizontal, 24)
-            .padding(.top, 16)
-            .padding(.bottom, 16)
-        }
-        .background(
-            .ultraThinMaterial
-        )
-        .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: -5)
-        .ignoresSafeArea(edges: .bottom)
     }
 }
 

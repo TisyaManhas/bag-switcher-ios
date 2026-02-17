@@ -39,14 +39,13 @@ struct BagCardView: View {
 
             // Floating close button on top of preview
             Button(action: onClose) {
-                Image(systemName: "xmark.circle.fill")
-                    .font(.system(size: 24))
-                    .foregroundColor(.white)
-                    .symbolRenderingMode(.hierarchical)
+                Image(systemName: "xmark")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(.gray)
+                    .frame(width: 20, height: 20)
                     .background(
                         Circle()
-                            .fill(Color.black.opacity(0.3))
-                            .frame(width: 28, height: 28)
+                            .fill(Color.white.opacity(0.85))
                     )
             }
             .padding(8)

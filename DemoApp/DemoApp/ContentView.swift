@@ -15,7 +15,7 @@ struct ContentView: View {
 
     var body: some View {
         ZStack {
-            // Main bag screen view - hide when switcher is open and not zooming
+            // Main bag screen view - show when not in switcher or when zooming back
             if !showBagSwitcher || selectedBagForZoom != nil {
                 ZStack {
                     BagScreenView(
